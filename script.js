@@ -5,8 +5,8 @@ let listaPedido = [];
 let totalAcumulado = 0;
 let rolloActual = {}; 
 
-// URL de tu Google Apps Script (App Web)
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbyysS2vy5QwiJjumguQdK5pvblqGE4llBnV1rasMCZUWp3swpyPAcu12uw0dFEpJ4vV/exec"; 
+// URL de tu Google Apps Script (App Web) - ACTUALIZADA
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzElOT31LZWrDF_t-dC4--TMXDfBfyU0-QnjcpyQvQTJ0kwk5OHvP5aE3XCI_dQWm9H/exec"; 
 
 // ==========================================
 // 2. GESTIÓN DEL CARRITO
@@ -116,10 +116,10 @@ async function enviarWhatsApp() {
         return alert("¡Tu carrito está vacío!");
     }
     if (!nombre || !direccion) {
-        return alert("Por favor, ingresa nombre y dirección.");
+        return alert("Por favor, ingresa tu nombre y dirección de entrega.");
     }
 
-    // Preparar paquete de datos para la base de datos
+    // Paquete de datos para Google Sheets
     const datosParaSheet = {
         nombre: nombre,
         direccion: direccion,
@@ -128,35 +128,32 @@ async function enviarWhatsApp() {
         notas: notas
     };
 
-    // 1. Envío a Google Sheets (Asíncrono)
-    // Se usa 'no-cors' para evitar bloqueos del navegador al contactar con Google
-    fetch(URL_SCRIPT, {
-        method: "POST",
-        mode: "no-cors", 
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(datosParaSheet)
-    })
-    .then(() => {
-        console.log("✅ Datos enviados a Google Sheets correctamente.");
-    })
-    .catch(err => {
-        console.error("❌ Error al enviar a Sheets:", err);
-    });
+    // 1. Envío a Google Sheets mediante el Script
+    try {
+        fetch(URL_SCRIPT, {
+            method: 'POST',
+            mode: 'no-cors', // Permite el envío sin bloqueos de seguridad
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datosParaSheet)
+        });
+        console.log("Datos enviados a la hoja de cálculo.");
+    } catch (error) {
+        console.error("Error al conectar con Sheets:", error);
+    }
 
-    // 2. Formatear mensaje para WhatsApp
-    const telefono = "523221523363"; 
-    const listaFormateada = listaPedido.map(item => `• ${item}`).join("\n");
+    // 2. Preparar mensaje para WhatsApp
+    const numeroTelefono = "5213221523363"; // RECUERDA PONER TU NÚMERO AQUÍ
+    const mensajeWA = `*NUEVO PEDIDO - YOKO SUSHI*%0A` +
+                      `------------------------------%0A` +
+                      `*Cliente:* ${nombre}%0A` +
+                      `*Dirección:* ${direccion}%0A` +
+                      `*Pedido:* ${listaPedido.join(", ")}%0A` +
+                      `*Notas:* ${notas}%0A` +
+                      `------------------------------%0A` +
+                      `*TOTAL:* $${totalAcumulado}.00 MXN`;
 
-    const textoWhatsApp = `*NUEVO PEDIDO: YOKO SUSHI* 🍣\n\n` +
-                          `👤 *Cliente:* ${nombre}\n` +
-                          `📍 *Dirección:* ${direccion}\n\n` +
-                          `🍱 *Detalle:* \n${listaFormateada}\n\n` +
-                          `💰 *Total:* $${totalAcumulado}\n` +
-                          `📝 *Notas:* ${notas}`;
+    const urlWhatsApp = `https://wa.me/${numeroTelefono}?text=${mensajeWA}`;
 
-    // 3. Ejecutar apertura de WhatsApp
-    const urlWA = `https://wa.me/${telefono}?text=${encodeURIComponent(textoWhatsApp)}`;
-    window.open(urlWA, '_blank');
+    // 3. Abrir WhatsApp en una nueva pestaña
+    window.open(urlWhatsApp, '_blank');
 }
