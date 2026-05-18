@@ -6,7 +6,7 @@ let totalAcumulado = 0;
 let rolloActual = {}; 
 
 // URL de tu Google Apps Script (App Web) - ACTUALIZADA
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxxxLQrJSVBMRW99tUl5XeTRr871GXmOhAuEOZ4xfxITFo74yxOiWnP-omFw5NKSc8How/exec"; 
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzpeTA0bzvBGdjPoVK2tg0lZDydMZp3GOKH5YitxH5NcFemTYS8eg6Cy9Z_gzgXPIec/exec"; 
 
 // ==========================================
 // 2. GESTIÓN DEL CARRITO
