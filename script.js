@@ -6,7 +6,7 @@ let totalAcumulado = 0;
 let rolloActual = {}; 
 
 // URL de tu Google Apps Script (App Web) - ACTUALIZADA
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzElOT31LZWrDF_t-dC4--TMXDfBfyU0-QnjcpyQvQTJ0kwk5OHvP5aE3XCI_dQWm9H/exec"; 
+const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxxxLQrJSVBMRW99tUl5XeTRr871GXmOhAuEOZ4xfxITFo74yxOiWnP-omFw5NKSc8How/exec"; 
 
 // ==========================================
 // 2. GESTIÓN DEL CARRITO
@@ -76,7 +76,7 @@ function abrirDetalle(nombre, imagen, precio, descripcion) {
     
     const precioElem = document.querySelector('.modal-precio');
     if(precioElem) {
-        precioElem.innerText = `$${precio}.00`;
+        precioElem.innerText = `$${precio}.00;
     }
 
     modal.classList.add('open');
@@ -150,7 +150,7 @@ async function enviarWhatsApp() {
                       `*Pedido:* ${listaPedido.join(", ")}%0A` +
                       `*Notas:* ${notas}%0A` +
                       `------------------------------%0A` +
-                      `*TOTAL:* $${totalAcumulado}.00 MXN`;
+                      `*TOTAL:* $${totalAcumulado}.00 'MXN`;
 
     const urlWhatsApp = `https://wa.me/${numeroTelefono}?text=${mensajeWA}`;
 
