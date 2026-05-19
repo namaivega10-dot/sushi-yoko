@@ -143,7 +143,7 @@ async function enviarWhatsApp() {
     }
 
     // 2. Preparar mensaje para WhatsApp
-    const numeroTelefono = "5213221523363"; // RECUERDA PONER TU NÚMERO AQUÍ
+    const numeroTelefono = "523221523363"; // RECUERDA PONER TU NÚMERO AQUÍ
     const mensajeWA = `*NUEVO PEDIDO - YOKO SUSHI*%0A` +
                       `------------------------------%0A` +
                       `*Cliente:* ${nombre}%0A` +
