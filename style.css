@@ -2,8 +2,8 @@
 
 /* 1. VARIABLES Y CONFIGURACIÓN BASE */
 :root {
-    --primary: #D4AF37; /* Dorado elegante */
-    --primary-hover: #b8972e;
+    --primary: #ec0000; /* Dorado elegante */
+    --primary-hover: #ff0000;
     --bg-dark: #0f0f0f;
     --glass-bg: rgba(20, 20, 20, 0.75);
     --glass-border: rgba(255, 255, 255, 0.1);
@@ -14,7 +14,7 @@
 body {
     background: transparent; /* Permite ver el video */
     color: var(--text-main);
-    font-family: 'Inter', sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
     margin: 0;
     padding-bottom: 140px; 
     overflow-x: hidden;
@@ -46,7 +46,7 @@ h1, h2, h3, .menu-digital, .modal-precio, .total-texto {
     height: auto;
     transform: translateX(-50%) translateY(-50%);
     object-fit: cover;
-    opacity: 0.5; /* Hacemos el video sutil */
+    opacity: 0.9; /* Hacemos el video sutil */
 }
 
 .overlay-video {
@@ -118,8 +118,8 @@ header img:hover {
 }
 
 .category-btn:hover {
-    background: rgba(40, 40, 40, 0.8);
-    border-color: rgba(212, 175, 55, 0.5);
+    background: rgb(28, 22, 22);
+    border-color: rgb(212, 55, 55);
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
@@ -163,7 +163,7 @@ header img:hover {
 
 .producto:hover {
     transform: translateY(-5px);
-    border-color: rgba(212, 175, 55, 0.3);
+    border-color: rgba(44, 38, 38, 0.3);
     box-shadow: 0 10px 25px rgba(0,0,0,0.4);
 }
 
@@ -337,7 +337,7 @@ textarea {
 }
 
 .btn-enviar-wa {
-    background: linear-gradient(135deg, #D4AF37, #B08D28);
+    background: linear-gradient( #2cb028);
     color: #000;
     border: none;
     padding: 12px 24px;
@@ -355,7 +355,7 @@ textarea {
 
 .btn-enviar-wa:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+    box-shadow: 0 6px 20px rgba(235, 235, 235, 0.955);
 }
 
 .btn-enviar-wa:active {
@@ -477,7 +477,7 @@ textarea {
     width: 100%;
     padding: 16px;
     border-radius: 14px;
-    background: linear-gradient(135deg, #D4AF37, #B08D28);
+    background: linear-gradient(135deg, #d43737, #b02865);
     color: #000;
     border: none;
     font-size: 1.1rem;
