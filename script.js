@@ -1,160 +1,167 @@
-// ==========================================
-// 1. VARIABLES GLOBALES Y CONFIGURACIÓN
-// ==========================================
-let listaPedido = [];
-let totalAcumulado = 0;
-let rolloActual = {}; 
+let carrito = [];
+let productoEnModal = null;
+let precioEnModal = 0;
 
-// URL de tu Google Apps Script (App Web) - ACTUALIZADA
-const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzUpKGD_svol7-o2z_AQBleW2aNNDibrexDW5iVHtqeKsp5Xg0seXFU-xh_IPooJQU/exec"; 
-
-// ==========================================
-// 2. GESTIÓN DEL CARRITO
-// ==========================================
-
-/**
- * Agrega un producto a la lista y suma al total
- */
-function agregarAlPedido(nombre, precio) {
-    listaPedido.push(nombre);
-    totalAcumulado += precio;
-    actualizarInterfaz();
-}
-
-/**
- * Quita un producto de la lista y resta del total
- */
-function quitarDelPedido(nombre, precio) {
-    const indice = listaPedido.indexOf(nombre);
-    if (indice > -1) {
-        listaPedido.splice(indice, 1);
-        totalAcumulado -= precio;
-        actualizarInterfaz();
-    }
-}
-
-/**
- * Actualiza el texto del total en la barra inferior
- */
-function actualizarInterfaz() {
-    const totalElem = document.getElementById('total');
-    if (totalElem) {
-        totalElem.innerText = totalAcumulado;
-    }
-}
-
-// ==========================================
-// 3. CONTROL DE MODALES E INTERFAZ
-// ==========================================
-
-/**
- * Abre o cierra las categorías del menú (Fríos, Calientes, Mexas)
- */
-function toggleCategory(id) {
-    const content = document.getElementById(id);
-    const allContent = document.querySelectorAll('.category-content');
+function toggleCategory(categoryId) {
+    const content = document.getElementById(categoryId);
+    const arrow = content.previousElementSibling.querySelector('.arrow');
     
-    // Si la categoría ya está abierta, la cierra. Si no, cierra las demás y abre esta.
-    if (content.style.display === "block") {
-        content.style.display = "none";
+    if (content.style.display === 'block') {
+        content.style.display = 'none';
+        arrow.style.transform = 'rotate(0deg)';
     } else {
-        allContent.forEach(el => el.style.display = 'none');
-        content.style.display = "block";
+        content.style.display = 'block';
+        arrow.style.transform = 'rotate(180deg)';
     }
 }
 
-/**
- * Abre el modal con la información detallada del producto
- */
 function abrirDetalle(nombre, imagen, precio, descripcion) {
-    const modal = document.getElementById('modal-sushi');
-    rolloActual = { nombre, precio };
-
+    productoEnModal = nombre;
+    precioEnModal = precio;
+    
     document.getElementById('modal-titulo').innerText = nombre;
     document.getElementById('modal-imagen').src = imagen;
     document.getElementById('modal-descripcion').innerText = descripcion;
+    document.getElementById('modal-precio-texto').innerText = '$' + precio;
     
-    const precioElem = document.querySelector('.modal-precio');
-    if(precioElem) {
-        // CORREGIDO: Se cerraron correctamente las comillas invertidas
-        precioElem.innerText = `$${precio}.00`; 
-    }
-
-    modal.classList.add('open');
+    document.getElementById('modal-sushi').style.display = 'flex';
 }
 
-/**
- * Cierra el modal de detalle
- */
 function cerrarDetalle() {
-    document.getElementById('modal-sushi').classList.remove('open');
+    document.getElementById('modal-sushi').style.display = 'none';
+    productoEnModal = null;
+    precioEnModal = 0;
 }
 
-/**
- * Función que se ejecuta desde el botón del modal para confirmar la selección
- */
+function agregarAlPedido(nombre, precio) {
+    const item = carrito.find(p => p.nombre === nombre);
+    if (item) {
+        item.cantidad++;
+    } else {
+        carrito.push({ nombre, precio, cantidad: 1 });
+    }
+    actualizarTotal();
+    showToast(`${nombre} agregado al pedido`, 'success');
+}
+
+function quitarDelPedido(nombre, precio) {
+    const itemIndex = carrito.findIndex(p => p.nombre === nombre);
+    if (itemIndex > -1) {
+        carrito[itemIndex].cantidad--;
+        if (carrito[itemIndex].cantidad === 0) {
+            carrito.splice(itemIndex, 1);
+        }
+        actualizarTotal();
+        showToast(`1 x ${nombre} removido del pedido`, 'success');
+    }
+}
+
 function confirmarYAgregar() {
-    if (rolloActual.nombre) {
-        agregarAlPedido(rolloActual.nombre, rolloActual.precio);
+    if (productoEnModal) {
+        agregarAlPedido(productoEnModal, precioEnModal);
         cerrarDetalle();
     }
 }
 
-// ==========================================
-// 4. ENVÍO DE DATOS (EXCEL + WHATSAPP)
-// ==========================================
+function actualizarTotal() {
+    const total = carrito.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+    document.getElementById('total').innerText = total;
+}
 
-/**
- * Procesa el pedido, lo envía a la base de datos y abre WhatsApp
- */
+function showToast(message, type) {
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+    if (!toast || !toastMessage) return;
+    
+    toastMessage.textContent = message;
+    toast.className = `toast ${type} show`;
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
+
+// Configuración de Google Sheets y WhatsApp
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxelPg5xObqU4SF5oBtyVsDhs2S9dSnlEZm6Ai_buRVa-rbMGyPha_wGeSinR57nHoN/exec'; // Cambiar por tu URL de script
+const WHATSAPP_NUMBER = '523221523363';
+
 async function enviarWhatsApp() {
-    const nombre = document.getElementById('nombreCliente').value.trim();
-    const direccion = document.getElementById('direccionCliente').value.trim();
-    const notas = document.getElementById('notas').value.trim() || "Sin notas";
+    const nombreCliente = document.getElementById('nombreCliente').value.trim();
+    const direccionCliente = document.getElementById('direccionCliente').value.trim();
+    const notas = document.getElementById('notas').value.trim();
+    const total = document.getElementById('total').innerText;
 
-    // Validaciones de seguridad
-    if (listaPedido.length === 0) {
-        return alert("¡Tu carrito está vacío!");
-    }
-    if (!nombre || !direccion) {
-        return alert("Por favor, ingresa tu nombre y dirección de entrega.");
+    if (!nombreCliente || !direccionCliente) {
+        showToast('Por favor ingresa tu nombre y dirección.', 'error');
+        return;
     }
 
-    // Paquete de datos para Google Sheets
-    const datosParaSheet = {
-        nombre: nombre,
-        direccion: direccion,
-        pedido: listaPedido.join(", "),
-        total: totalAcumulado,
+    if (carrito.length === 0) {
+        showToast('Tu carrito está vacío.', 'error');
+        return;
+    }
+
+    const btnSubmit = document.getElementById('btn-enviar');
+    const btnText = btnSubmit.querySelector('.btn-text');
+    const loader = btnSubmit.querySelector('.loader');
+
+    btnSubmit.disabled = true;
+    if(btnText) btnText.classList.add('transparent');
+    if(loader) loader.classList.remove('hidden');
+
+    let pedidoDetallado = carrito.map(item => `${item.cantidad}x ${item.nombre} ($${item.precio * item.cantidad})`).join(', ');
+
+    const data = {
+        nombre: nombreCliente,
+        direccion: direccionCliente,
+        pedidoDetallado: pedidoDetallado,
+        totalAcumulado: total,
         notas: notas
     };
 
-    // 1. Envío a Google Sheets mediante el Script
     try {
-        fetch(URL_SCRIPT, {
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
-            mode: 'no-cors', // Permite el envío sin bloqueos de seguridad
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datosParaSheet)
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
+            body: JSON.stringify(data)
         });
-        console.log("Datos enviados a la hoja de cálculo.");
+
+        showToast('¡Pedido registrado exitosamente!', 'success');
+
+        let mensajeWA = `🍣 *NUEVO PEDIDO YOKO SUSHI* 🍣%0A%0A`;
+        mensajeWA += `*Nombre:* ${nombreCliente}%0A`;
+        mensajeWA += `*Dirección:* ${direccionCliente}%0A%0A`;
+        mensajeWA += `*Pedido:*%0A`;
+        carrito.forEach(item => {
+            mensajeWA += `- ${item.cantidad}x ${item.nombre} ($${item.precio * item.cantidad})%0A`;
+        });
+        mensajeWA += `%0A*Total:* $${total} MXN%0A`;
+        if (notas) {
+            mensajeWA += `*Notas:* ${notas}%0A`;
+        }
+
+        const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${mensajeWA}`;
+        
+        setTimeout(() => {
+            window.open(whatsappUrl, '_blank');
+        }, 1500);
+
+        // Limpiar formulario y carrito
+        document.getElementById('nombreCliente').value = '';
+        document.getElementById('direccionCliente').value = '';
+        document.getElementById('notas').value = '';
+        carrito = [];
+        actualizarTotal();
+
     } catch (error) {
-        console.error("Error al conectar con Sheets:", error);
+        console.error('Error enviando pedido:', error);
+        showToast('Hubo un problema al procesar el pedido. Intenta nuevamente.', 'error');
+    } finally {
+        btnSubmit.disabled = false;
+        if(btnText) btnText.classList.remove('transparent');
+        if(loader) loader.classList.add('hidden');
     }
-
-    // 2. Preparar mensaje para WhatsApp
-    const numeroTelefono = "523221523363"; // RECUERDA PONER TU NÚMERO AQUÍ
-    const mensajeWA = `*NUEVO PEDIDO - YOKO SUSHI*%0A` +
-                      `------------------------------%0A` +
-                      `*Cliente:* ${nombre}%0A` +
-                      `*Dirección:* ${direccion}%0A` +
-                      `*Pedido:* ${listaPedido.join(", ")}%0A` +
-                      `*Notas:* ${notas}%0A` +
-                      `------------------------------%0A` +
-                      `*TOTAL:* $${totalAcumulado}.00 MXN`;
-
-    const urlWhatsApp = `https://wa.me/${numeroTelefono}?text=${mensajeWA}`;
-
-    // 3. Abrir WhatsApp en una nueva pestaña
-    window.open(urlWhatsApp, '_blank');
 }
